@@ -46,6 +46,9 @@ public class DisplayManager {
 		glfwShowWindow(windowID);
 		
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 	}
 	
 	public void Destroy() {
@@ -65,4 +68,12 @@ public class DisplayManager {
 		// TODO Auto-generated method stub
 		return height;
 	}
+	
+    public boolean isKeyPressed(int keyCode) {
+		int state = glfwGetKey(windowID, keyCode);
+		if (state == GLFW_PRESS) {
+		    return true;
+		}
+		return false;
+    }
 }
