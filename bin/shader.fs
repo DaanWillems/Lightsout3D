@@ -6,6 +6,7 @@ out vec4 fragColor;
 uniform sampler2D texture_sampler;
 uniform vec3 colour;
 uniform int useColour;
+uniform int selected;
 
 void main()
 {
@@ -17,4 +18,13 @@ void main()
     {
         fragColor = texture(texture_sampler, outTexCoord);
     }
+    
+    if ( selected == 1) 
+    {
+		fragColor = vec4(0.0, 0.0, 0.3, 0.3);
+	}
+	else 
+	{
+	     fragColor = texture(texture_sampler, outTexCoord);
+	}
 }

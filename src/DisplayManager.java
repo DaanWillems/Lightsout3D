@@ -48,7 +48,8 @@ public class DisplayManager {
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
-		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+		glfwSetInputMode(windowID, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+		//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 	}
 	
 	public void Destroy() {

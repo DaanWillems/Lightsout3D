@@ -3,8 +3,11 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryUtil;
-
+import org.joml.Intersectionf;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
+
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
@@ -17,7 +20,13 @@ import java.util.ArrayList;
 import org.joml.Matrix4f;
 
 public class Renderer {
-	
+    private final Vector3f max;
+
+    private final Vector3f min;
+
+    private final Vector2f nearFar;
+
+    private Vector3f dir;
 	/**
      * Field of View in Radians
      */
@@ -34,8 +43,16 @@ public class Renderer {
 	private Transformation transformation;
 
 	private DisplayManager display;
+
+	private Matrix4f viewMatrix;
 	
 	public Renderer(DisplayManager display) {
+		
+	    dir = new Vector3f();
+        min = new Vector3f();
+        max = new Vector3f();
+        nearFar = new Vector2f();
+		
 		this.display = display;
 		transformation = new Transformation();
 		
@@ -53,6 +70,7 @@ public class Renderer {
 			shaderProgram.createUniform("texture_sampler");
 			shaderProgram.createUniform("colour");
 			shaderProgram.createUniform("useColour");
+			shaderProgram.createUniform("selected");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -72,9 +90,10 @@ public class Renderer {
 		shaderProgram.setUniform("projectionMatrix", projectionMatrix);
 		
 		// Update view Matrix
-		Matrix4f viewMatrix = transformation.getViewMatrix(camera);
+		viewMatrix = transformation.getViewMatrix(camera);
 		
 		shaderProgram.setUniform("texture_sampler", 0);
+		selectGameItem(gameItems, camera);
 		
 		 for(GameItem gameItem : gameItems) {
 			 Mesh mesh = gameItem.getMesh();
@@ -82,10 +101,46 @@ public class Renderer {
 			Matrix4f modelViewMatrix = transformation.getModelViewMatrix(gameItem, viewMatrix);
 			shaderProgram.setUniform("modelViewMatrix", modelViewMatrix);
 			// Render the mesh for this game item
+			if(gameItem.isSelected()) {
+			    shaderProgram.setUniform("selected", 1);
+			    System.out.println("Working");
+			} else {
+			    shaderProgram.setUniform("selected", 0);
+			}
 		    shaderProgram.setUniform("colour", mesh.getColour());
 		    shaderProgram.setUniform("useColour", mesh.isTextured() ? 0 : 1);
 			mesh.render();
 		}
 	    shaderProgram.unbind();
 	}
+	
+    public void selectGameItem(ArrayList<GameItem> gameItems, Camera camera) {        
+        dir = viewMatrix.positiveZ(dir).negate();
+        selectGameItem(gameItems, camera.getPosition(), dir);
+}
+    
+    public boolean selectGameItem(ArrayList<GameItem> gameItems, Vector3f center, Vector3f dir) {
+    	
+    	boolean selected = false;
+        GameItem selectedGameItem = null;
+        float closestDistance = Float.POSITIVE_INFINITY;
+
+        for (GameItem gameItem : gameItems) {
+            gameItem.setSelected(false);
+            min.set(gameItem.getPosition());
+            max.set(gameItem.getPosition());
+            min.add(-gameItem.getScale(), -gameItem.getScale(), -gameItem.getScale());
+            max.add(gameItem.getScale(), gameItem.getScale(), gameItem.getScale());
+            if (Intersectionf.intersectRayAab(center, dir, min, max, nearFar) && nearFar.x < closestDistance) {
+                closestDistance = nearFar.x;
+                selectedGameItem = gameItem;
+            }
+        }
+
+        if (selectedGameItem != null) {
+            selectedGameItem.setSelected(true);
+            selected = true;
+        }
+        return selected;
+}
 }

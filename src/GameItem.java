@@ -9,6 +9,8 @@ public class GameItem {
 
     private final Vector3f rotation;
 
+	private boolean selected;
+
     public GameItem(Mesh mesh) {
         this.mesh = mesh;
         position = new Vector3f(0, 0, 0);
@@ -47,4 +49,12 @@ public class GameItem {
     public Mesh getMesh() {
         return mesh;
     }
+
+	public void setSelected(boolean b) {
+		selected = b;
+	}
+	
+	public boolean isSelected() {
+		return selected;
+	}
 }

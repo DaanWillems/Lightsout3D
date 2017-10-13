@@ -62,20 +62,29 @@ public class Game {
 		}
 		
 		try {
-	        texture = new Texture("/resources/grassblock.png");
+	        texture = new Texture("/resources/light.png");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			System.out.println("woop");
 			e.printStackTrace();
 		}
-		
-		
-        //mesh.setTexture(texture);
-        GameItem gameItem = new GameItem(mesh);
-        gameItem.setScale(0.5f);
-        gameItem.setPosition(0, 0, -2);
         gameItems = new ArrayList<GameItem>();
-        gameItems.add(gameItem);
+		
+        GameItem[][][] items = new GameItem[3][3][3];
+        
+        mesh.setTexture(texture);
+        for(int i = 0; i < 3; i ++) {
+            for(int x = 0; x < 3; x ++) {
+                for(int y = 0; y < 3; y ++) {
+                    GameItem gameItem = new GameItem(mesh);
+                    gameItem.setScale(0.4f);
+                    gameItem.setPosition(x, y, i-2);
+                    gameItems.add(gameItem);
+                    items[i][x][y] = gameItem;
+                }	
+            }
+        }
+
       
 	    // Loop continuously and render and update
 	    while (!displayManager.shouldClose())
@@ -118,9 +127,9 @@ public class Game {
 	    } else if (displayManager.isKeyPressed(GLFW_KEY_D)) {
 	        cameraInc.x = 1;
 	    }
-	    if (displayManager.isKeyPressed(GLFW_KEY_Z)) {
+	    if (displayManager.isKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
 	        cameraInc.y = -1;
-	    } else if (displayManager.isKeyPressed(GLFW_KEY_X)) {
+	    } else if (displayManager.isKeyPressed(GLFW_KEY_SPACE)) {
 	        cameraInc.y = 1;
 	    }
 	}
@@ -131,11 +140,15 @@ public class Game {
 			        cameraInc.y * CAMERA_POS_STEP,
 			        cameraInc.z * CAMERA_POS_STEP);
 		 
+		 Vector2f rotVec = mouseInput.getDisplVec();
+        camera.moveRotation(rotVec.x * MOUSE_SENSITIVITY, rotVec.y * MOUSE_SENSITIVITY, 0);
+
 	    // Update camera based on mouse            
 	    if (mouseInput.isRightButtonPressed()) {
-	    	System.out.println("test");
-	        Vector2f rotVec = mouseInput.getDisplVec();
-	        camera.moveRotation(rotVec.x * MOUSE_SENSITIVITY, rotVec.y * MOUSE_SENSITIVITY, 0);
+	    	glfwSetInputMode(displayManager.windowID, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+       	}
+	    if (mouseInput.isLeftButtonPressed()) {
+	    	glfwSetInputMode(displayManager.windowID, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	    }
     }
 	
